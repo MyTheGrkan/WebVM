@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tarayıcıda Sanal Makine</title>
+    <style>
+        #screen {
+            width: 800px;
+            height: 600px;
+            border: 3px solid #333;
+        }
+        .controls {
+            margin: 15px 0;
+        }
+        button {
+            padding: 8px 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tarayıcıda Sanal Makine</h1>
+    
+    <div id="screen"></div>
+    
+    <div class="controls">
+        <input type="file" id="iso-input" accept=".iso,.img">
+        <button onclick="startVM()">Başlat</button>
+        <button onclick="stopVM()">Durdur</button>
+    </div>
+
+    <!-- v86 Kütüphanesi -->
+    <script src="v86/libv86.js"></script>
+    
+    <script>
+        let emulator;
+        
+        function startVM() {
+            const isoFile = document.getElementById("iso-input").files[0];
+            if (!isoFile) return alert("Lütfen bir ISO dosyası seçin!");
+
+            const isoURL = URL.createObjectURL(isoFile);
+            
+            emulator = new V86Starter({
+                wasm_path: "v86/v86.wasm",
+                memory_size: 512 * 1024 * 1024,
+                vga_memory_size: 16 * 1024 * 1024,
+                screen_container: document.getElementById("screen"),
+                bios: { url: "v86/seabios(1).bin" },
+                cdrom: { url: isoURL },
+                autostart: true,
+            });
+        }
+        
+        function stopVM() {
+            if (emulator) {
+                emulator.stop();
+                document.getElementById("screen").innerHTML = "";
+                alert("Sanal makine durduruldu");
+            }
+        }
+    </script>
+</body>
+</html>
